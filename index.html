@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>API GitHub</title>
+</head>
+
+<body>
+    <h1>API GitHub</h1>
+    <div class="form">
+        <form action="" method="POST">
+            <h2>Digite o nome de usuário no GitHub para listar os repositórios</h2>
+            <div class="label-user">
+                <label for="username">Nome de usuário: </label>
+            </div>
+            <div class="input">
+                <input type="text" class="input-user" id="username" required autocomplete="username">
+            </div>
+            <div class="btn">
+                <button onclick="consultaRepositorios()">Pesquisar</button>
+            </div>
+        </form>
+    </div>
+    <div id="mostrar_resultado"></div>
+    <script>
+        function consultaRepositorios() {
+            var username = document.getElementById('username').value;
+            var endpoint = 'https://api.github.com/users/' + username + '/repos';
+            var request = new XMLHttpRequest();
+            request.open('GET', endpoint, true);
+
+            request.onload = function () {
+                if (request.status === 200) {
+                    var data = JSON.parse(this.responseText);
+                    var resultado = document.getElementById('mostrar_resultado');
+
+                    if (data.length === 0) {
+                        resultado.innerHTML = 'Nenhum repositório encontrado para o usuário ' + username + '.';
+                    } else {
+                        resultado.innerHTML = '<h2>Repositórios públicos de ' + username + ':</h2>';
+
+                        var table = '<table id="repositories"><thead><tr><th>Número</th><th>Nome</th><th>Descrição</th><th>Link</th><th>Homepage</th></tr></thead><tbody>';
+                        var cont = 0; // Inicialize a variável cont aqui
+                        data.forEach(function (repo) {
+                            table += '<tr>';
+                            table += '<td>' + ++cont + '</td>';
+                            table += '<td><img src="' + repo.owner.avatar_url + '" alt="Imagem do usuário"> </td>';
+                            table += '<td>' + repo.name + '</td>';
+                            table += '<td>' + (repo.description || 'N/A') + '</td>';
+                            table += '<td><a href="' + repo.html_url + '">Ver</a></td>';
+                            table += '<td><a href="' + (repo.homepage || '#') + '">Ver</a></td>';
+                            table += '</tr>';
+                        });
+
+                        table += '</tbody></table>';
+                        resultado.innerHTML += table;
+                    }
+                } else if (request.status === 404) {
+                    // Lidar com o caso de usuário não encontrado
+                }
+            };
+
+            request.send();
+        }
+
+    </script>
+</body>
+
+</html>
